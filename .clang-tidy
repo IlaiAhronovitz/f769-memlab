@@ -1,0 +1,28 @@
+# clang-tidy configuration of f769-memlab: the checks of docs/CODING-STANDARD.md
+# (tools/quality.sh passes the same list on the command line).
+# performance-no-int-to-ptr and clang-analyzer-core.FixedAddressDereference are
+# off for deviation DEV-MEM-01 only (docs/deviations/memlab.md): the target
+# code reaches memory-mapped registers at fixed addresses, by design. This file
+# turns them off everywhere (editors); tools/quality.sh turns them off only for
+# the register-level files and checks src/bench_chain.c, src/libmin.c and the
+# host tests with them on.
+Checks: >
+  -*,
+  bugprone-*,
+  cert-*,
+  clang-analyzer-*,
+  misc-*,
+  performance-*,
+  portability-*,
+  readability-*,
+  -readability-magic-numbers,
+  -readability-identifier-length,
+  -misc-include-cleaner,
+  -bugprone-easily-swappable-parameters,
+  -readability-avoid-unconditional-preprocessor-if,
+  -performance-no-int-to-ptr,
+  -clang-analyzer-core.FixedAddressDereference
+WarningsAsErrors: '*'
+CheckOptions:
+  readability-function-cognitive-complexity.Threshold: 25
+  readability-function-size.LineThreshold: 80

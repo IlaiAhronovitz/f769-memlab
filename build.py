@@ -8,9 +8,9 @@
     python build.py read           dump the results block and print it
     python build.py test           host unit tests (tools/, no board needed)
 
-Options: --serial SN  pin the ST-LINK by USB serial. This PC has many
-ST-LINKs; two of them are ST-LINK/V2 (USB PID 3748), which OpenOCD cannot
-tell apart by PID. Pass --serial whenever more than one is plugged in.
+Options: --serial SN  pin the ST-LINK by USB serial. ST-LINK/V2 probes all
+share USB PID 3748, so OpenOCD cannot tell them apart by PID. Pass --serial
+whenever more than one is plugged in.
 Environment: GCC_BIN (folder of arm-none-eabi-gcc), OPENOCD (openocd binary).
 """
 import argparse
@@ -93,7 +93,9 @@ def flash(serial):
 
 
 def dump(serial):
-    path = os.path.join("build", "results.bin")
+    # Forward slash on every OS: OpenOCD's Tcl reads "\r" in "build\results.bin"
+    # as a carriage return ("couldn't open buildesults.bin").
+    path = "build/results.bin"
     # Halt first: an ST-LINK/V2 can read zeros while the core sleeps in WFI.
     # Halting out of WFI sometimes fails on this probe, so retry a few times.
     for attempt in range(3):

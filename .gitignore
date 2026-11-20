@@ -3,3 +3,9 @@ __pycache__/
 *.pyc
 # vendor factory image (ST copyright) stays local
 backup/
+# private planning notes, reviews and task files
+research/
+# notes for one machine (local paths, WSL distro, probes)
+CLAUDE.local.md
+# scratch directory of tools/quality.sh, if a run was killed
+.quality-*/

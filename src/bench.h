@@ -3,7 +3,14 @@
 #pragma once
 #include <stdint.h>
 
+/* long_call: the code runs from ITCM (0x00000100) and is called from flash
+ * (0x08000000), out of BL range. clang has no such attribute (it would need
+ * -mlong-calls); clang only analyses this code, it never builds the image. */
+#if defined(__clang__)
+#define ITCM_FN __attribute__((section(".itcm_text"), noinline))
+#else
 #define ITCM_FN __attribute__((section(".itcm_text"), noinline, long_call))
+#endif
 
 /* Follow `loads` dependent pointers starting at `start` (loads % 8 == 0).
  * Returns the last pointer so the chain cannot be optimised away. */
@@ -16,8 +23,3 @@ ITCM_FN uint32_t bench_seq_read(const uint32_t *buf, uint32_t words, uint32_t re
 /* Store `words` 32-bit words, `reps` times (words % 8 == 0). */
 ITCM_FN void bench_seq_write(uint32_t *buf, uint32_t words, uint32_t reps,
                              uint32_t pattern, uint32_t *cycles);
-
-/* Build one random cycle through every 32-byte line of buf (Sattolo's
- * algorithm), so each load of bench_chase lands on a new line in an order
- * the hardware cannot predict. Returns the chain start. */
-void *const *chase_build(void *buf, uint32_t bytes, uint32_t seed);

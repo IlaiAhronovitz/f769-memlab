@@ -60,7 +60,14 @@ load is still in flight. SYSCLK is 216 MHz from the PLL fed by HSI.
 ## Results (first run, 2026-11-20)
 
 Full tables are in [`results/run-20261120-1310.md`](results/run-20261120-1310.md), with the
-raw block in the `.bin` next to it.
+raw block in the `.bin` next to it. A later run of the current code
+([`results/run-20261120-1551.md`](results/run-20261120-1551.md)) reproduced every table figure.
+
+**Layout-sensitive rows.** Figures for working sets near the 16 KiB D-cache size (16-64 KiB) depend on the
+whole image's layout, not only on the memory under test. Moving two small flash tables, with byte-identical timed
+code, changed 10 figures, the largest from 3.97 to 7.01 cycles per load (SRAM2, 16 KiB, write-through); see
+deviation DEV-MEM-10 in [`docs/deviations/memlab.md`](docs/deviations/memlab.md). Compare these rows only between
+builds with the same layout.
 
 The device reported itself as DEV_ID 0x451 and REV_ID 0x1000, core r1p0. The register
 read-back confirms SYSCLK = 216 MHz (PLLCFGR 0x29003608, CFGR 0x0000940A, FLASH_ACR 0x307).
@@ -109,12 +116,18 @@ The tools are the Arm GNU Toolchain 14.2 (`arm-none-eabi-gcc`), xPack OpenOCD
 
 ```
 python build.py            # build/memlab.elf
-python build.py test       # host unit tests of the results parser
+python build.py test       # host tests: results parser, layout checker, pointer-chase builder (needs a host C compiler)
 python build.py run        # flash, wait for the suite, print and save results
 python build.py read       # read the results block again
+bash tools/quality.sh      # the quality gate (WSL or Linux): MISRA C:2012, CERT C, strict warnings, sanitizers
 ```
 
 If more than one ST-LINK/V2 is plugged in, pass `--serial <SN>`.
+
+The code follows [`docs/CODING-STANDARD.md`](docs/CODING-STANDARD.md) (MISRA C:2012 with the deviations listed in
+[`docs/MISRA-COMPLIANCE.md`](docs/MISRA-COMPLIANCE.md)); `tools/quality/README.md` describes the gate. Because the
+published numbers depend on the image layout, a change to `src/` must also pass `tools/disasm_check.py` against the
+measured build.
 
 ## Roadmap
 
