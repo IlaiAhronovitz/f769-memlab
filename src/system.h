@@ -2,7 +2,7 @@
 #pragma once
 #include <stdint.h>
 
-#define SYSCLK_HZ  216000000u
+#define SYSCLK_HZ  216000000U
 
 /* SYSCLK = 216 MHz from the PLL fed by HSI (16 MHz), with over-drive and
  * 7 flash wait states. HSI is used so the result does not depend on which

@@ -1,0 +1,38 @@
+# cppcheck suppressions for f769-memlab. Every line names its deviation record
+# in docs/deviations/memlab.md; nothing is suppressed without one.
+# Format: <id>:<file>  (cppcheck --suppressions-list; '#' lines are dropped).
+
+# DEV-MEM-01 memory-mapped registers and cache maintenance by address
+misra-c2012-11.4:src/bench.c
+misra-c2012-11.4:src/cache.c
+misra-c2012-11.4:src/dmatest.c
+misra-c2012-11.4:src/main.c
+misra-c2012-11.4:src/results.c
+misra-c2012-11.4:src/system.c
+misra-c2012-11.6:src/cache.c
+
+# DEV-MEM-03 the benchmark's deliberate access patterns (buffers read as
+# words and as pointer chains, pointer walks in the timed loops)
+misra-c2012-11.5:src/bench_chain.c
+misra-c2012-11.5:src/main.c
+misra-c2012-11.5:src/libmin.c
+misra-c2012-18.4:src/bench.c
+
+# DEV-MEM-04 libmin: memset/memcpy under their standard names, external
+# linkage for calls the compiler emits on its own
+misra-c2012-21.2:src/libmin.h
+misra-c2012-21.2:src/libmin.c
+misra-c2012-8.7:src/libmin.c
+
+# DEV-MEM-06 early return from a polling loop that failed
+misra-c2012-15.5:src/dmatest.c
+misra-c2012-15.5:src/system.c
+
+# DEV-MEM-07 the timed loops count their parameters down (published code)
+misra-c2012-17.8:src/bench.c
+
+# DEV-MEM-08 fault_report is called from assembly (startup.s)
+misra-c2012-8.7:src/results.c
+
+# DEV-MEM-10 bench buffers and k_regions at file scope: the measured layout is frozen
+misra-c2012-8.9:src/main.c

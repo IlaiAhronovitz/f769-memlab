@@ -8,13 +8,13 @@
 #pragma once
 #include <stdint.h>
 
-#define RES_MAGIC       0x4C4D374Du     /* "M7ML" in memory order */
-#define RES_VERSION     1u
-#define RES_MAX_ROWS    400u
+#define RES_MAGIC       0x4C4D374DU     /* "M7ML" in memory order */
+#define RES_VERSION     1U
+#define RES_MAX_ROWS    400U
 
-enum res_status { ST_RUNNING = 1, ST_DONE = 2, ST_FAULT = 3 };
+enum { ST_RUNNING = 1, ST_DONE = 2, ST_FAULT = 3 };     /* status */
 
-enum res_test {
+enum {              /* test: what a row measured */
     T_CHASE      = 1,   /* dependent loads, random order over cache lines   */
     T_SEQ_RD     = 2,   /* sequential 32-bit loads                          */
     T_SEQ_WR     = 3,   /* sequential 32-bit stores                         */
@@ -27,12 +27,12 @@ enum res_test {
     T_CPU_FILL   = 16,  /* cycles for the CPU to write the source buffer    */
 };
 
-enum res_region {
+enum {              /* region: where the working set lives */
     R_DTCM = 1, R_SRAM1 = 2, R_SRAM2 = 3, R_ITCM = 4,
     R_FLASH_AXIM = 5, R_FLASH_ITCM = 6, R_DMABUF = 7,
 };
 
-enum res_cfg {
+enum {              /* cfg: the cache configuration */
     C_OFF       = 0,    /* I-cache off, D-cache off                         */
     C_I         = 1,    /* I-cache on,  D-cache off                         */
     C_ID_WB     = 2,    /* both on, default attributes (write-back, allocate) */
@@ -43,9 +43,9 @@ enum res_cfg {
 };
 
 typedef struct {
-    uint16_t test;      /* enum res_test   */
-    uint8_t  region;    /* enum res_region */
-    uint8_t  cfg;       /* enum res_cfg    */
+    uint16_t test;      /* T_*  */
+    uint8_t  region;    /* R_*  */
+    uint8_t  cfg;       /* C_*  */
     uint32_t size;      /* bytes in the working set */
     uint32_t ops;       /* loads, stores or words moved */
     uint32_t cycles;    /* DWT cycles */
@@ -53,10 +53,26 @@ typedef struct {
 } res_row_t;            /* 20 bytes */
 
 typedef struct {
-    uint32_t magic, version, status, n_rows;
-    uint32_t idcode, cpuid, clidr, ccsidr_d, ccsidr_i, mpu_type;
-    uint32_t sysclk_hz, pllcfgr, cfgr, acr, pwr_csr1;
-    uint32_t fault_pc, fault_cfsr, fault_hfsr, fault_addr, step;
+    uint32_t magic;
+    uint32_t version;
+    uint32_t status;
+    uint32_t n_rows;
+    uint32_t idcode;
+    uint32_t cpuid;
+    uint32_t clidr;
+    uint32_t ccsidr_d;
+    uint32_t ccsidr_i;
+    uint32_t mpu_type;
+    uint32_t sysclk_hz;
+    uint32_t pllcfgr;
+    uint32_t cfgr;
+    uint32_t acr;
+    uint32_t pwr_csr1;
+    uint32_t fault_pc;
+    uint32_t fault_cfsr;
+    uint32_t fault_hfsr;
+    uint32_t fault_addr;
+    uint32_t step;
     uint32_t reserved[12];              /* header = 32 words = 128 bytes */
     res_row_t rows[RES_MAX_ROWS];
 } results_t;
@@ -65,3 +81,7 @@ extern results_t g_res;
 
 void res_add(uint16_t test, uint8_t region, uint8_t cfg, uint32_t size,
              uint32_t ops, uint32_t cycles, uint32_t extra);
+
+/* Called by Fault_Handler (startup.s) with the stacked exception frame:
+ * records the faulting PC and fault status, then stops. */
+void fault_report(const uint32_t *frame);
